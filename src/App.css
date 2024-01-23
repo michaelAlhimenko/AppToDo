@@ -146,18 +146,6 @@ body {
 .toggle-all:checked + label:before {
 	color: #737373;
 }
-.clear-completed,
-html .clear-completed:active {
-	position: relative;
-	line-height: 20px;
-	text-decoration: none;
-	cursor: pointer;
-}
-
-.clear-completed:hover {
-	text-decoration: underline;
-}
-
 .info {
 	margin: 65px auto 0;
 	color: #4d4d4d;

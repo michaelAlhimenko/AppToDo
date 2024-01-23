@@ -3,6 +3,9 @@
 	padding: 0;
 	list-style: none;
 }
+.todo-list {
+	transition: all 1s;
+}
 
 .todo-list li {
 	position: relative;
@@ -84,7 +87,7 @@
 	color: #4d4d4d;
 }
 
-.todo-list li.completed label .description {
+.todo-list .completed label .description {
 	color: #cdcdcd;
 	text-decoration: line-through;
 }
