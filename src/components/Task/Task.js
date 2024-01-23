@@ -8,25 +8,17 @@ export default class Task extends Component {
     constructor(){
         super();
         this.date = formatDistanceToNow(new Date(), { addSuffix: true });
-        this.state = {
-            done: false,
-        }
     }
-
-    onDone = () => {
-        this.setState((state) => {
-            return {
-                done: !state.done,
-            } 
-        })
-    }
+    
     render(){
-        const { id, onDelite, ...itemProps } = this.props;
+        const { id, onDelite, onToogleDone, done, ...itemProps } = this.props;
         
         let classNames = 'view';
+        let checked = false; 
 
-        if (this.state.done){
+        if (done){
             classNames += ' completed';
+            checked = true;
         }else{
             classNames = 'view';
         }
@@ -35,7 +27,7 @@ export default class Task extends Component {
         return (
                 <>
                 <div className={ classNames }>
-                    <input className="toggle" type="checkbox" onClick={ this.onDone } />
+                    <input className="toggle" type="checkbox" readOnly checked={ checked ? true : false } onClick={ () => onToogleDone(id) } />
                     <label>
                         <span className="description">{itemProps.description}</span>
                         <span className="created">{`${this.date}`}</span>

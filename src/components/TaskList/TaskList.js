@@ -4,22 +4,15 @@ import './index.css';
 
 export default class TaskList extends Component {
 
-    constructor(){
-        super();
-        this.state = {
-            done: false,
-        }
-
-    }
-
     render(){
-        const { data, onDelite } = this.props;
+        const { data, onDelite, onToogleDone} = this.props;
         const element = data.map((item) => {
             return (
-                <li key={item.id}>
+                <li key={ item.id }>
                     <Task 
                         { ...item }
-                        onDelite = { onDelite }
+                        onDelite = { () => onDelite(item.id) }
+                        onToogleDone = { ()=>  onToogleDone(item.id) }
                     />
                 </li>
             )
