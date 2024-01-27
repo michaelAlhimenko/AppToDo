@@ -1,14 +1,24 @@
-import React, { Component } from 'react';
-import NewTaskForm from '../NewTaskForm/NewTaskForm';
-import './index.css';
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+
+import NewTaskForm from '../NewTaskForm/NewTaskForm'
+
+import './index.css'
 
 export default class Header extends Component {
-    render(){
-        return (      
-            <header className="header">
-                <h1>todos</h1>
-                <NewTaskForm  onItemAdd ={ this.props.onItemAdd } />
-            </header>
-        )
-    }
+  static defaultProps = {
+    onItemAdd: () => {},
+  }
+  static propTypes = {
+    onItemAdd: PropTypes.func,
+  }
+  render() {
+    const { onItemAdd } = this.props
+    return (
+      <header className="header">
+        <h1>todos</h1>
+        <NewTaskForm onItemAdd={onItemAdd} />
+      </header>
+    )
+  }
 }
