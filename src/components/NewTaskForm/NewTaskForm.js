@@ -42,7 +42,7 @@ export default class NewTaskForm extends Component {
           className="new-todo"
           value={this.state.desc}
           onChange={this.onDescChange}
-          placeholder="What needs to be done?"
+          placeholder="Что должно быть сделано?"
           autoFocus
         />
       </form>
