@@ -3,8 +3,6 @@ import PropTypes from 'prop-types'
 
 import NewTaskForm from '../NewTaskForm/NewTaskForm'
 
-import './index.css'
-
 export default class Header extends Component {
   static defaultProps = {
     onItemAdd: () => {},
