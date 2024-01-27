@@ -34,6 +34,9 @@
     "format": "prettier --write ./src",
     "precommit": "lint-staged"
   },
+  "lint-staged": {
+    "*.{js,jsx}": ["eslint --fix", "prettier --write"]
+  },
   "eslintConfig": {
     "extends": [
       "react-app",
