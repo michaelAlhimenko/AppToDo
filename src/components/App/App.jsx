@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
+import { nanoid } from 'nanoid'
 
-import Header from './components/Header/Header.js'
-import TaskFilter from './components/TasksFilter/TaskFilter.js'
-import TaskList from './components/TaskList/TaskList.js'
+import Header from '../Header/Header.jsx'
+import TaskFilter from '../TasksFilter/TaskFilter.jsx'
+import TaskList from '../TaskList/TaskList.jsx'
 
 import './App.css'
 
@@ -16,31 +17,26 @@ export default class App extends Component {
         this.createToDoItem('Active task'),
       ],
       notFilteredData: [],
-      filterOptions: 'all',
+      filterOptions: 'All',
       counterOfTasks: 3,
     }
   }
 
   createToDoItem = (desc) => {
-    let id = Math.random() * 10000000
-
     return {
-      id: id.toFixed(0),
+      id: nanoid(),
       description: desc,
       done: false,
       date: new Date(),
     }
   }
   deleteItem = (id) => {
+    console.log(id)
     this.setState(({ data, notFilteredData }) => {
-      const itemDelId = data.findIndex((el) => el.id === id)
-
-      const newArr = [...data.slice(0, itemDelId), ...data.slice(itemDelId + 1)]
+      const newArr = data.filter((el) => el.id !== id)
 
       if (notFilteredData.length !== 0) {
-        const itemDelId = notFilteredData.findIndex((el) => el.id === id)
-        const newArrFiltered = [...notFilteredData.slice(0, itemDelId), ...notFilteredData.slice(itemDelId + 1)]
-
+        const newArrFiltered = notFilteredData.filter((el) => el.id !== id)
         return {
           data: newArr,
           notFilteredData: newArrFiltered,
@@ -57,22 +53,23 @@ export default class App extends Component {
   onToogleDone = (id) => {
     this.setState(({ data, notFilteredData }) => {
       if (notFilteredData.length !== 0) {
-        const itemId = notFilteredData.findIndex((el) => el.id === id)
-        const oldItem = notFilteredData[itemId]
-
-        const newItem = { ...oldItem, done: !oldItem.done }
-        const newArr = [...notFilteredData.slice(0, itemId), newItem, ...notFilteredData.slice(itemId + 1)]
+        const newArr = notFilteredData.map((item) => {
+          if (item.id === id) {
+            return { ...item, done: !item.done }
+          }
+          return item
+        })
 
         return {
           notFilteredData: newArr,
         }
       } else {
-        const itemId = data.findIndex((el) => el.id === id)
-        const oldItem = data[itemId]
-        const newItem = { ...oldItem, done: !oldItem.done }
-
-        const newArr = [...data.slice(0, itemId), newItem, ...data.slice(itemId + 1)]
-
+        const newArr = data.map((item) => {
+          if (item.id === id) {
+            return { ...item, done: !item.done }
+          }
+          return item
+        })
         return {
           data: newArr,
         }
@@ -83,6 +80,9 @@ export default class App extends Component {
   }
 
   onItemAdd = (text) => {
+    if (text === '' || !text.trim()) {
+      return
+    }
     this.setState(({ data, notFilteredData }) => {
       const newItem = this.createToDoItem(text)
 
@@ -107,7 +107,7 @@ export default class App extends Component {
 
   onChangeFilter = (value) => {
     switch (value) {
-      case 'all':
+      case 'All':
         this.setState((state) => {
           const { notFilteredData } = state
 
@@ -123,7 +123,7 @@ export default class App extends Component {
         })
         break
 
-      case 'completed':
+      case 'Completed':
         this.setState((state) => {
           const { data, notFilteredData } = state
 
@@ -146,7 +146,7 @@ export default class App extends Component {
         })
         break
 
-      case 'active':
+      case 'Active':
         this.setState((state) => {
           const { data, notFilteredData } = state
 
@@ -178,13 +178,26 @@ export default class App extends Component {
   }
 
   onClearToDo = () => {
-    this.setState(() => {
-      return {
-        data: [],
-        notFilteredData: [],
-        filterOptions: 'all',
+    this.setState((state) => {
+      const { data, notFilteredData } = state
+
+      if (notFilteredData.length !== 0) {
+        const newArr = notFilteredData.filter((item) => !item.done)
+        return {
+          data: [],
+          notFilteredData: newArr,
+        }
+      } else {
+        const newArr = data.filter((item) => !item.done)
+
+        return {
+          data: newArr,
+          notFilteredData: [],
+          filterOptions: 'All',
+        }
       }
     })
+    this.onChangeFilter(this.state.filterOptions)
     this.onCounterOfTasks()
   }
 

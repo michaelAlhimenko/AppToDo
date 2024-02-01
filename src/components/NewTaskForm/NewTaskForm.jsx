@@ -44,6 +44,7 @@ export default class NewTaskForm extends Component {
           onChange={this.onDescChange}
           placeholder="Что должно быть сделано?"
           autoFocus
+          required
         />
       </form>
     )
