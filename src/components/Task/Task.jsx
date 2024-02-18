@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow, format } from 'date-fns'
 
 import './index.css'
 
@@ -26,6 +26,8 @@ export default class Task extends Component {
     super()
     this.state = {
       currentDate: new Date(),
+      timer: 0,
+      timerRunning: false,
     }
   }
 
@@ -43,8 +45,31 @@ export default class Task extends Component {
     })
   }
 
+  startTimer = () => {
+    if (!this.state.timerRunning) {
+      this.timer = setInterval(() => {
+        this.setState((prevState) => ({
+          timer: prevState.timer + 1,
+          timerRunning: true,
+        }))
+      }, 1000)
+    }
+  }
+
+  stopTimer = () => {
+    if (this.state.timerRunning) {
+      clearInterval(this.timer)
+      this.setState({ timerRunning: false })
+    }
+  }
+
+  formatTime(seconds) {
+    const time = new Date(seconds * 1000)
+    return format(time, 'mm:ss')
+  }
+
   render() {
-    const { id, done, description, date, onDelite, onToogleDone } = this.props
+    const { id, done, description, date, onDelite, onToogleDone, timer } = this.props
 
     let classNames = 'view'
     let checked = false
@@ -67,10 +92,15 @@ export default class Task extends Component {
             onClick={() => onToogleDone(id)}
           />
           <label>
-            <span className="description">{description}</span>
+            <span className="title">{description}</span>
+            <span className="description">
+              <span>{this.formatTime(timer)}</span>
+              <button className="icon icon-play" onClick={this.props.onStartTimer}></button>
+              <button className="icon icon-pause" onClick={this.props.onStopTimer}></button>
+            </span>
             <span className="created">{`${formatDistanceToNow(date, { addSuffix: true, includeSeconds: true })}`}</span>
           </label>
-          <button className="icon icon-edit"></button>
+          <button disabled={true} className="icon icon-edit"></button>
           <button className="icon icon-destroy" onClick={() => onDelite(id)}></button>
         </div>
         {this.props.editing ? <input type="text" className="edit" value="Editing task"></input> : ''}

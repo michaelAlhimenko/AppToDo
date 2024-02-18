@@ -28,12 +28,19 @@ export default class App extends Component {
       description: desc,
       done: false,
       date: new Date(),
+      timer: 0,
+      timerId: null,
     }
   }
   deleteItem = (id) => {
-    console.log(id)
     this.setState(({ data, notFilteredData }) => {
-      const newArr = data.filter((el) => el.id !== id)
+      const newArr = data.filter((el) => {
+        if (el.id === id) {
+          clearInterval(el.timerId)
+          clearInterval(el.timerId + 1)
+        }
+        return el.id !== id
+      })
 
       if (notFilteredData.length !== 0) {
         const newArrFiltered = notFilteredData.filter((el) => el.id !== id)
@@ -51,6 +58,7 @@ export default class App extends Component {
   }
 
   onToogleDone = (id) => {
+    this.stopTimer(id)
     this.setState(({ data, notFilteredData }) => {
       if (notFilteredData.length !== 0) {
         const newArr = notFilteredData.map((item) => {
@@ -217,11 +225,56 @@ export default class App extends Component {
     })
   }
 
+  startTimer = (id) => {
+    this.setState(({ data }) => {
+      const newArr = data.map((item) => {
+        if (item.id === id && item.timerId === null) {
+          const startTime = Date.now() - item.timer * 1000
+          const timerId = setInterval(() => {
+            this.setState(({ data }) => {
+              const newArr = data.map((item) => {
+                if (item.id === id) {
+                  const timer = Math.floor((Date.now() - startTime) / 1000)
+                  return { ...item, timer }
+                }
+                return item
+              })
+              return { data: newArr }
+            })
+          }, 1000)
+          return { ...item, timerId }
+        }
+        return item
+      })
+      return { data: newArr }
+    })
+  }
+
+  stopTimer = (id) => {
+    this.setState(({ data }) => {
+      const newArr = data.map((item) => {
+        if (item.id === id && item.timerId !== null) {
+          clearInterval(item.timerId)
+          clearInterval(item.timerId + 1)
+          return { ...item, timerId: null }
+        }
+        return item
+      })
+      return { data: newArr }
+    })
+  }
+
   render() {
     return (
       <section className="todoapp">
         <Header onItemAdd={this.onItemAdd} />
-        <TaskList data={this.state.data} onDelite={this.deleteItem} onToogleDone={this.onToogleDone} />
+        <TaskList
+          data={this.state.data}
+          onDelite={this.deleteItem}
+          onToogleDone={this.onToogleDone}
+          onStartTimer={this.startTimer}
+          onStopTimer={this.stopTimer}
+        />
         <TaskFilter
           data={this.state.filterOptions}
           onChangeFilter={this.onChangeFilter}
