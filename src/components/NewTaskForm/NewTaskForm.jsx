@@ -1,52 +1,59 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import './index.css'
 
-export default class NewTaskForm extends Component {
-  static defaultProps = {
-    onItemAdd: () => {},
-  }
+const NewTaskForm = ({ onItemAdd }) => {
+  const [desc, setDesc] = useState('')
+  const [min, setMin] = useState('')
+  const [sec, setSec] = useState('')
 
-  static propTypes = {
-    onItemAdd: PropTypes.func,
+  const onDescChange = (e) => {
+    setDesc(e.target.value)
   }
-
-  constructor() {
-    super()
-    this.state = {
-      desc: '',
+  const onMinChange = (e) => {
+    if (isNaN(e.target.value)) {
+      return setMin('')
     }
+    setMin(e.target.value)
+  }
+  const onSecChange = (e) => {
+    if (isNaN(e.target.value)) {
+      return setSec('')
+    }
+    setSec(e.target.value)
   }
 
-  onDescChange = (e) => {
-    this.setState({
-      desc: e.target.value,
-    })
-  }
-
-  onSubmitDesc = (e) => {
-    const { onItemAdd } = this.props
-
+  const onSubmitDesc = (e) => {
     e.preventDefault()
-    onItemAdd(this.state.desc)
+    onItemAdd({ desc, min, sec })
 
-    this.setState({
-      desc: '',
-    })
+    setDesc('')
+    setMin('')
+    setSec('')
   }
 
-  render() {
-    return (
-      <form onSubmit={this.onSubmitDesc}>
-        <input
-          className="new-todo"
-          value={this.state.desc}
-          onChange={this.onDescChange}
-          placeholder="Что должно быть сделано?"
-          autoFocus
-          required
-        />
-      </form>
-    )
-  }
+  return (
+    <form className="new-todo-form" onSubmit={(e) => onSubmitDesc(e)}>
+      <input
+        className="new-todo"
+        value={desc}
+        onChange={onDescChange}
+        placeholder="Что должно быть сделано?"
+        autoFocus
+        required
+      />
+      <input className="new-todo-form__timer" value={min} onChange={onMinChange} placeholder="Min"></input>
+      <input className="new-todo-form__timer" value={sec} onChange={onSecChange} placeholder="Sec"></input>
+      <button type="submit" style={{ display: 'none' }}></button>
+    </form>
+  )
+}
+export default NewTaskForm
+
+NewTaskForm.defaultProps = {
+  onItemAdd: () => {},
+}
+
+NewTaskForm.spropTypes = {
+  onItemAdd: PropTypes.func,
 }

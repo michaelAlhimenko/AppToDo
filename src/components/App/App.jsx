@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useEffect, useState } from 'react'
 import { nanoid } from 'nanoid'
 
 import Header from '../Header/Header.jsx'
@@ -7,176 +7,153 @@ import TaskList from '../TaskList/TaskList.jsx'
 
 import './App.css'
 
-export default class App extends Component {
-  constructor() {
-    super()
-    this.state = {
-      data: [
-        this.createToDoItem('Completed task'),
-        this.createToDoItem('Editing task'),
-        this.createToDoItem('Active task'),
-      ],
-      notFilteredData: [],
-      filterOptions: 'All',
-      counterOfTasks: 3,
-    }
-  }
-
-  createToDoItem = (desc) => {
+const App = () => {
+  const [notFilteredData, setNotFilteredData] = useState([])
+  const [filterOptions, setFilterOptions] = useState('All')
+  const [counterOfTasks, setCounterOfTasks] = useState(3)
+  const createToDoItem = (desc, time, done = false) => {
     return {
       id: nanoid(),
       description: desc,
-      done: false,
+      done: done,
       date: new Date(),
-      timer: 0,
-      timerId: null,
+      timer: time,
+      timerId: 0,
     }
   }
-  deleteItem = (id) => {
-    this.setState(({ data, notFilteredData }) => {
-      const newArr = data.filter((el) => {
-        if (el.id === id) {
-          clearInterval(el.timerId)
-          clearInterval(el.timerId + 1)
+  const [data, setData] = useState([])
+
+  const deleteItem = (id) => {
+    const newArr = data.filter((el) => {
+      if (el.id === id) {
+        clearInterval(el.timerId)
+        clearInterval(el.timerId + 1)
+      }
+      return el.id !== id
+    })
+
+    setData(newArr)
+
+    if (notFilteredData.length !== 0) {
+      const newArrFiltered = notFilteredData.filter((el) => el.id !== id)
+      setNotFilteredData(newArrFiltered)
+    }
+    onCounterOfTasks()
+  }
+
+  const onCounterOfTasks = () => {
+    if (notFilteredData.length !== 0) {
+      const doneCount = notFilteredData.filter((el) => !el.done).length
+      setCounterOfTasks(doneCount)
+    } else {
+      const doneCount = data.filter((el) => !el.done).length
+      setCounterOfTasks(doneCount)
+    }
+  }
+  const onToggleDone = (id) => {
+    let done = null
+    if (notFilteredData.length !== 0) {
+      const newArr = notFilteredData.map((item) => {
+        if (item.id === id) {
+          done = !item.done
+          return { ...item, done: !item.done }
         }
-        return el.id !== id
+        return item
       })
-
-      if (notFilteredData.length !== 0) {
-        const newArrFiltered = notFilteredData.filter((el) => el.id !== id)
-        return {
-          data: newArr,
-          notFilteredData: newArrFiltered,
-        }
-      } else {
-        return {
-          data: newArr,
-        }
+      setNotFilteredData(newArr)
+      if (done === false) {
+        startTimer(id)
       }
-    })
-    this.onCounterOfTasks()
-  }
-
-  onToogleDone = (id) => {
-    this.stopTimer(id)
-    this.setState(({ data, notFilteredData }) => {
-      if (notFilteredData.length !== 0) {
-        const newArr = notFilteredData.map((item) => {
-          if (item.id === id) {
-            return { ...item, done: !item.done }
-          }
-          return item
-        })
-
-        return {
-          notFilteredData: newArr,
+    } else {
+      const newArr = data.map((item) => {
+        if (item.id === id) {
+          done = !item.done
+          return { ...item, done: !item.done }
         }
-      } else {
-        const newArr = data.map((item) => {
-          if (item.id === id) {
-            return { ...item, done: !item.done }
-          }
-          return item
-        })
-        return {
-          data: newArr,
-        }
+        return item
+      })
+      setData(newArr)
+      if (done === false) {
+        startTimer(id)
       }
-    })
-    this.onChangeFilter(this.state.filterOptions)
-    this.onCounterOfTasks()
+    }
+    onChangeFilter(filterOptions)
+    onCounterOfTasks()
   }
+  const onClearToDo = () => {
+    const updatedData = data.filter((item) => !item.done)
+    const updatedNotFilteredData = notFilteredData.filter((item) => !item.done)
 
-  onItemAdd = (text) => {
-    if (text === '' || !text.trim()) {
+    setData(updatedData)
+    setNotFilteredData(updatedNotFilteredData)
+    setFilterOptions('All')
+    onCounterOfTasks()
+  }
+  const onItemAdd = (text) => {
+    if (text.desc === '' || !text.desc.trim()) {
       return
     }
-    this.setState(({ data, notFilteredData }) => {
-      const newItem = this.createToDoItem(text)
+    const time = Number(text.min * 60) + (text.sec.length > 0 ? Number(text.sec) : 0)
+    const newItem = createToDoItem(text.desc, time)
 
-      if (notFilteredData.length !== 0) {
-        const newArr = [...notFilteredData, newItem]
-
-        return {
-          notFilteredData: newArr,
-        }
-      }
-
+    if (notFilteredData.length !== 0) {
+      const newArr = [...notFilteredData, newItem]
+      setNotFilteredData(newArr)
+    } else {
       const newArr = [...data, newItem]
-
-      return {
-        data: newArr,
-      }
-    })
-
-    this.onChangeFilter(this.state.filterOptions)
-    this.onCounterOfTasks()
+      setData(newArr)
+    }
+    startTimer(newItem.id)
+    onChangeFilter(filterOptions)
+    onCounterOfTasks()
   }
 
-  onChangeFilter = (value) => {
+  const onChangeFilter = (value) => {
     switch (value) {
       case 'All':
-        this.setState((state) => {
-          const { notFilteredData } = state
+        if (notFilteredData.length === 0) {
+          return
+        }
 
-          if (notFilteredData.length === 0) {
-            return
-          }
+        setData(notFilteredData)
+        setFilterOptions(value)
+        setNotFilteredData([])
 
-          return {
-            data: notFilteredData,
-            filterOptions: value,
-            notFilteredData: [],
-          }
-        })
         break
 
       case 'Completed':
-        this.setState((state) => {
-          const { data, notFilteredData } = state
+        if (notFilteredData.length !== 0) {
+          const newArr = notFilteredData.filter((item) => item.done)
 
-          if (notFilteredData.length !== 0) {
-            const newArr = notFilteredData.filter((item) => item.done)
-
-            return {
-              data: newArr,
-              notFilteredData: notFilteredData,
-              filterOptions: value,
-            }
-          }
+          setData(newArr)
+          setNotFilteredData(notFilteredData)
+          setFilterOptions(value)
+        } else {
           const newArr = data.filter((item) => item.done)
           const NewFiltredData = data
-          return {
-            data: newArr,
-            notFilteredData: NewFiltredData,
-            filterOptions: value,
-          }
-        })
+
+          setData(newArr)
+          setNotFilteredData(NewFiltredData)
+          setFilterOptions(value)
+        }
+
         break
 
       case 'Active':
-        this.setState((state) => {
-          const { data, notFilteredData } = state
+        if (notFilteredData.length !== 0) {
+          const newArr = notFilteredData.filter((item) => !item.done)
 
-          if (notFilteredData.length !== 0) {
-            const newArr = notFilteredData.filter((item) => !item.done)
-
-            return {
-              data: newArr,
-              notFilteredData: notFilteredData,
-              filterOptions: value,
-            }
-          }
-
+          setData(newArr)
+          setNotFilteredData(notFilteredData)
+          setFilterOptions(value)
+        } else {
           const newArr = data.filter((item) => !item.done)
           const NewFiltredData = data
 
-          return {
-            data: newArr,
-            notFilteredData: NewFiltredData,
-            filterOptions: value,
-          }
-        })
+          setData(newArr)
+          setNotFilteredData(NewFiltredData)
+          setFilterOptions(value)
+        }
 
         break
 
@@ -185,103 +162,67 @@ export default class App extends Component {
     }
   }
 
-  onClearToDo = () => {
-    this.setState((state) => {
-      const { data, notFilteredData } = state
-
-      if (notFilteredData.length !== 0) {
-        const newArr = notFilteredData.filter((item) => !item.done)
-        return {
-          data: [],
-          notFilteredData: newArr,
-        }
-      } else {
-        const newArr = data.filter((item) => !item.done)
-
-        return {
-          data: newArr,
-          notFilteredData: [],
-          filterOptions: 'All',
-        }
-      }
-    })
-    this.onChangeFilter(this.state.filterOptions)
-    this.onCounterOfTasks()
-  }
-
-  onCounterOfTasks = () => {
-    this.setState(({ data, notFilteredData }) => {
-      if (notFilteredData.length !== 0) {
-        const doneCount = notFilteredData.filter((el) => !el.done).length
-        return {
-          counterOfTasks: doneCount,
-        }
-      } else {
-        const doneCount = data.filter((el) => !el.done).length
-        return {
-          counterOfTasks: doneCount,
-        }
-      }
-    })
-  }
-
-  startTimer = (id) => {
-    this.setState(({ data }) => {
-      const newArr = data.map((item) => {
-        if (item.id === id && item.timerId === null) {
-          const startTime = Date.now() - item.timer * 1000
+  const startTimer = (id) => {
+    setData((oldData) => {
+      const newArr = oldData.map((item) => {
+        if (item.id === id) {
+          console.log(item.id + item.timerId)
+          const startTime = Date.now() + item.timer * 1000
           const timerId = setInterval(() => {
-            this.setState(({ data }) => {
-              const newArr = data.map((item) => {
+            setData((oldData) => {
+              const newArr = oldData.map((item) => {
                 if (item.id === id) {
-                  const timer = Math.floor((Date.now() - startTime) / 1000)
+                  const timer = Math.floor((startTime - Date.now()) / 1000)
                   return { ...item, timer }
                 }
                 return item
               })
-              return { data: newArr }
+              return newArr
             })
           }, 1000)
           return { ...item, timerId }
         }
         return item
       })
-      return { data: newArr }
+      return newArr
     })
   }
 
-  stopTimer = (id) => {
-    this.setState(({ data }) => {
-      const newArr = data.map((item) => {
-        if (item.id === id && item.timerId !== null) {
+  const stopTimer = (id) => {
+    setData((oldData) => {
+      const newArr = oldData.map((item) => {
+        if (item.id === id) {
           clearInterval(item.timerId)
-          clearInterval(item.timerId + 1)
-          return { ...item, timerId: null }
+          clearInterval(item.timerId - 1)
+          return { ...item, timerId: 0 }
+        } else {
+          return item
         }
-        return item
       })
-      return { data: newArr }
+      return newArr
     })
   }
-
-  render() {
-    return (
-      <section className="todoapp">
-        <Header onItemAdd={this.onItemAdd} />
-        <TaskList
-          data={this.state.data}
-          onDelite={this.deleteItem}
-          onToogleDone={this.onToogleDone}
-          onStartTimer={this.startTimer}
-          onStopTimer={this.stopTimer}
-        />
-        <TaskFilter
-          data={this.state.filterOptions}
-          onChangeFilter={this.onChangeFilter}
-          onClearToDo={this.onClearToDo}
-          onCounterOfTasks={this.state.counterOfTasks}
-        />
-      </section>
-    )
-  }
+  useEffect(() => {
+    onCounterOfTasks()
+  })
+  return (
+    <div className="todoapp">
+      <Header onItemAdd={onItemAdd} />
+      <TaskList
+        data={data}
+        onDelite={deleteItem}
+        onToggleDone={onToggleDone}
+        onStartTimer={startTimer}
+        onStopTimer={stopTimer}
+      />
+      <TaskFilter
+        data={filterOptions}
+        onChangeFilter={onChangeFilter}
+        onClearToDo={onClearToDo}
+        onCounterOfTasks={counterOfTasks}
+      />
+    </div>
+  )
 }
+
+export default App
