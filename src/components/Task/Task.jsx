@@ -4,7 +4,19 @@ import { formatDistanceToNow, format } from 'date-fns'
 
 import './index.css'
 
-const Task = ({ id, done, description, date, onDelite, onToggleDone, timer, onStartTimer, onStopTimer, editing }) => {
+const Task = ({
+  id,
+  done,
+  timerStatus,
+  description,
+  date,
+  onDelite,
+  onToggleDone,
+  timer,
+  onStartTimer,
+  onStopTimer,
+  editing,
+}) => {
   const formatTime = (seconds) => {
     const time = new Date(seconds * 1000)
     return format(time, 'mm:ss')
@@ -19,7 +31,7 @@ const Task = ({ id, done, description, date, onDelite, onToggleDone, timer, onSt
     classNames = 'view'
   }
   useEffect(() => {
-    if (timer <= 0) {
+    if (timer === 0) {
       onStopTimer(id)
     }
   }, [timer])
@@ -45,7 +57,7 @@ const Task = ({ id, done, description, date, onDelite, onToggleDone, timer, onSt
           <span className="description">
             <span>{formatTime(timer)}</span>
             <button
-              disabled={done || timer === 0 ? true : false}
+              disabled={done || timer === 0 || timerStatus ? true : false}
               className="icon icon-play"
               onClick={onStartTimer}
             ></button>

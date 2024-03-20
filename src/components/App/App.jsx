@@ -19,6 +19,7 @@ const App = () => {
       date: new Date(),
       timer: time,
       timerId: 0,
+      timerStatus: true,
     }
   }
   const [data, setData] = useState([])
@@ -166,7 +167,6 @@ const App = () => {
     setData((oldData) => {
       const newArr = oldData.map((item) => {
         if (item.id === id) {
-          console.log(item.id + item.timerId)
           const startTime = Date.now() + item.timer * 1000
           const timerId = setInterval(() => {
             setData((oldData) => {
@@ -180,7 +180,7 @@ const App = () => {
               return newArr
             })
           }, 1000)
-          return { ...item, timerId }
+          return { ...item, timerId, timerStatus: true }
         }
         return item
       })
@@ -194,9 +194,9 @@ const App = () => {
         if (item.id === id) {
           clearInterval(item.timerId)
           clearInterval(item.timerId - 1)
-          return { ...item, timerId: 0 }
+          return { ...item, timerId: 0, timerStatus: false }
         } else {
-          return item
+          return { ...item }
         }
       })
       return newArr
