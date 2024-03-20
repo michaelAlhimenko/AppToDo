@@ -191,7 +191,6 @@ const App = () => {
   const stopTimer = (id) => {
     setData((oldData) => {
       const newArr = oldData.map((item) => {
-        console.log(item.timerId)
         if (item.id === id) {
           clearInterval(item.timerId)
           return { ...item, timerId: 0, timerStatus: false }
