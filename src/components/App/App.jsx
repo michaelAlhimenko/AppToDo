@@ -194,7 +194,6 @@ const App = () => {
         console.log(item.timerId)
         if (item.id === id) {
           clearInterval(item.timerId)
-          clearInterval(item.timerId - 1)
           return { ...item, timerId: 0, timerStatus: false }
         } else {
           return { ...item }
