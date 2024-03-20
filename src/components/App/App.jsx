@@ -172,7 +172,7 @@ const App = () => {
             setData((oldData) => {
               const newArr = oldData.map((item) => {
                 if (item.id === id) {
-                  const timer = Math.floor((startTime - Date.now()) / 1000)
+                  const timer = Math.ceil((startTime - Date.now()) / 1000)
                   return { ...item, timer }
                 }
                 return item
@@ -191,6 +191,7 @@ const App = () => {
   const stopTimer = (id) => {
     setData((oldData) => {
       const newArr = oldData.map((item) => {
+        console.log(item.timerId)
         if (item.id === id) {
           clearInterval(item.timerId)
           clearInterval(item.timerId - 1)

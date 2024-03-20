@@ -31,7 +31,7 @@ const Task = ({
     classNames = 'view'
   }
   useEffect(() => {
-    if (timer === 0) {
+    if (timer <= 0) {
       onStopTimer(id)
     }
   }, [timer])
