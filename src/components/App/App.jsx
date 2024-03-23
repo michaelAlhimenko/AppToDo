@@ -66,13 +66,11 @@ const App = () => {
     setFilterOptions('All')
   }
   const onItemAdd = (text) => {
-    console.log(text)
     if (text.desc === '' || !text.desc.trim()) {
       return
     }
     const time = Number(text.min * 60) + (text.sec.length > 0 ? Number(text.sec) : 0)
     const newItem = createToDoItem(text.desc, time)
-    console.log(time)
     const newArr = [...data, newItem]
     setData(newArr)
     startTimer(newItem.id)
@@ -112,7 +110,6 @@ const App = () => {
             return
           }
           const startTime = Date.now() + item.timer * 1000
-          console.log(startTime)
           const timerId = setInterval(() => {
             setData((oldData) => {
               const newArr = oldData.map((item) => {
